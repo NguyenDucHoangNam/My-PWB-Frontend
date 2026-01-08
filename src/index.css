@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+html, body {
+  min-height: 100%;
+}
+
+/* Base theme colors */
+@layer base {
+  :root {
+    --bg: 255 255 255; /* white */
+    --surface: 249 250 251; /* gray-50 */
+    --text: 17 24 39; /* gray-900 */
+    --muted: 75 85 99; /* gray-600 */
+    --border: 229 231 235; /* gray-200 */
+  }
+
+  .dark {
+    --bg: 17 17 23; /* near #111217 */
+    --surface: 24 25 36; /* near #1E1F2B */
+    --text: 229 231 235; /* gray-200 */
+    --muted: 156 163 175; /* gray-400 */
+    --border: 55 65 81; /* gray-700 */
+  }
+
+  html {
+    @apply antialiased font-inter;
+  }
+
+  body {
+    @apply bg-white text-gray-900 dark:bg-[rgb(var(--bg))] dark:text-[rgb(var(--text))];
+    background-color: rgb(var(--bg));
+    color: rgb(var(--text));
+  }
+}
+
+index.css
+.my-masonry-grid {
+  display: flex;
+  margin-left: -30px; /* gutter size offset */
+  width: auto;
+}
+.my-masonry-grid_column {
+  padding-left: 30px; /* gutter size */
+  background-clip: padding-box;
+}
