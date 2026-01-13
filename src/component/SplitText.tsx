@@ -42,7 +42,7 @@ const SplitText: React.FC<SplitTextProps> = ({
     if (typeof window === "undefined" || !ref.current || !text) return;
 
     const el = ref.current;
-    
+
     animationCompletedRef.current = false;
 
     const absoluteLines = splitType === "lines";

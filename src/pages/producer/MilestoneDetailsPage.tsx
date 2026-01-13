@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   FiPlus,
   FiCheckCircle,
@@ -144,7 +144,7 @@ const AudioPlayer = ({ file }: { file: MilestoneFile }) => (
 );
 
 function MilestoneDetailsPage() {
-  const [milestone, setMilestone] = useState(milestoneData);
+  const [milestone] = useState(milestoneData);
   const totalSplitAmount = milestone.splits.reduce(
     (sum, s) => sum + s.amount,
     0
@@ -177,7 +177,7 @@ function MilestoneDetailsPage() {
                 defaultValue={milestone.status}
                 className="bg-dark-surface border border-border-color rounded-lg px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent"
               >
-                <option>Chưa bắt đầu</option>
+                <option>Đang Chờ Lệnh</option>
                 <option>Đang làm</option>
                 <option>Chờ duyệt</option>
                 <option>Đã hoàn thành</option>

@@ -23,4 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 
-.env
+# Bỏ qua file env
+.env*
+
+# Generated Firebase Service Worker (generated from template during build)
+public/firebase-messaging-sw.js

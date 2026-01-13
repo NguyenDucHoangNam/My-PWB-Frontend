@@ -1,26 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { ThemeContext } from "./ThemeContextObject";
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [isDark, setIsDark] = useState(() => {
-    const storedTheme = localStorage.getItem('theme');
-    return storedTheme === 'dark';
-  });
+  // luôn dark, không cần state
+  const isDark = true;
 
   useEffect(() => {
     const html = document.documentElement;
-    if (isDark) {
-      html.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      html.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDark]);
+    html.classList.add("dark"); // luôn bật dark mode
+    localStorage.setItem("theme", "dark"); // ghi đè theme cũ nếu có
+  }, []);
 
-  const setTheme = (mode: 'light' | 'dark') => {
-    setIsDark(mode === 'dark');};
+  // hàm setTheme vẫn giữ để tránh lỗi, nhưng không cho đổi theme
+  const setTheme = () => {};
 
   return (
     <ThemeContext.Provider value={{ isDark, setTheme }}>

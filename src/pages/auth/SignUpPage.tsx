@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import type { RegisterRequest } from "../../services/authService";
-import { toast } from "react-hot-toast";
+import AnimatedBackground from "../../component/background/AnimatedBackground";
+import { EyeOffIcon } from "lucide-react";
+import { useCosmicToast } from "../../component/toast/CosmicToastProvider";
 
 // SVG Icons (giữ nguyên)
 const EyeIcon = () => (
@@ -27,13 +29,24 @@ const EyeIcon = () => (
   </svg>
 );
 
+type FormErrors = {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  passwordHash?: string;
+  dateOfBirth?: string;
+};
+
 function SignUpPage() {
   const { register, sendOtpForRegister, isLoading } = useAuth();
-  const [step, setStep] = useState<'form' | 'otp'>('form');
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState<'success' | 'error' | ''>('');
+  const [step, setStep] = useState<"form" | "otp">("form");
   const [otpCode, setOtpCode] = useState("");
-  
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const datePattern = /^\d{4}\/\d{2}\/\d{2}$/;
+  const { showToast } = useCosmicToast();
+
   const [formData, setFormData] = useState<RegisterRequest & { agreed: boolean }>({
     email: "",
     passwordHash: "",
@@ -43,7 +56,88 @@ function SignUpPage() {
     agreed: false,
   });
 
-  const handleInputChange = (e: any) => {
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  // --- Validate riêng từng field ---
+  const validateField = (field: keyof FormErrors) => {
+    switch (field) {
+      case "firstName":
+        return formData.firstName ? "" : "Vui lòng nhập họ!";
+      case "lastName":
+        return formData.lastName ? "" : "Vui lòng nhập tên!";
+      case "email":
+        if (!formData.email) return "Vui lòng nhập Email!";
+        if (!emailRegex.test(formData.email)) return "Email không đúng định dạng!";
+        return "";
+      case "passwordHash":
+        if (!formData.passwordHash) return "Vui lòng nhập mật khẩu!";
+        if (formData.passwordHash.length < 6) return "Mật khẩu phải có ít nhất 6 ký tự!";
+        return "";
+      case "dateOfBirth": {
+      // if (!formData.dateOfBirth) return "Vui lòng nhập ngày sinh!";
+      const parts = formData.dateOfBirth.split('/');
+      if(parts.length<3)
+        return "Vui lòng nhập đầy đủ tháng ngày năm"
+      if (!datePattern.test(formData.dateOfBirth))
+        return "Ngày sinh phải có định dạng yyyy/MM/dd";
+      // Kiểm tra hợp lệ ngày, tháng, năm
+      const [yearStr, monthStr, dayStr] = formData.dateOfBirth.split("/");
+      const year = parseInt(yearStr, 10);
+      const month = parseInt(monthStr, 10);
+      const day = parseInt(dayStr, 10);
+
+      // Tháng hợp lệ 1-12
+      if (month < 1 || month > 12) return "Tháng không hợp lệ (1-12)";
+      
+      // Ngày hợp lệ theo tháng và năm (đầy đủ cho tháng 2 nhuận)
+      const daysInMonth = new Date(year, month, 0).getDate();
+      if (day < 1 || day > daysInMonth) return `Ngày không hợp lệ cho tháng ${month}`;
+
+      return "";
+      }
+      default:
+        return "";
+    }
+  };
+
+  // --- Blur handler ---
+  const handleBlur = (field: keyof FormErrors) => {
+    setErrors((prev) => ({
+      ...prev,
+      [field]: validateField(field),
+    }));
+  };
+
+  // --- Validate toàn form ---
+  const validateAll = () => {
+    const newErrors: FormErrors = {};
+    (["firstName", "lastName", "email", "passwordHash", "dateOfBirth"] as (keyof FormErrors)[])
+      .forEach((field) => {
+        const error = validateField(field);
+        if (error) newErrors[field] = error;
+      });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // --- Gửi OTP ---
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateAll()) return;
+
+    const result = await sendOtpForRegister(formData.email);
+    console.log(formData)
+    if (result.success) {
+      setStep("otp");
+      showToast("Gửi mã otp đến email thành công!", "success")
+    }
+    else {
+      // toast hoặc message cho lỗi từ backend
+      showToast(result.message || "❌ Lỗi khi gửi mã OTP. Vui lòng thử lại!", "error");
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -51,100 +145,33 @@ function SignUpPage() {
     }));
   };
 
-  // Gửi OTP
-  const handleSendOtp = async (e: any) => {
+  // --- Đăng ký với OTP ---
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.email) {
-      setMessage("Vui lòng nhập email trước khi gửi OTP");
-      setMessageType("error");
-      return;
-    }
 
-    // Validate form data before sending OTP
-    if (!formData.firstName || !formData.lastName || !formData.passwordHash || !formData.dateOfBirth) {
-      setMessage("Vui lòng nhập đầy đủ thông tin");
-      setMessageType("error");
-      return;
-    }
+    const { ...registerData } = formData;
+    const result = await register(registerData, otpCode);
 
-    // Validate date format
-    const datePattern = /^\d{4}\/\d{2}\/\d{2}$/;
-    if (!datePattern.test(formData.dateOfBirth)) {
-      setMessage("Ngày sinh phải có định dạng yyyy/MM/dd (ví dụ: 1990/01/01)");
-      setMessageType("error");
-      return;
-    }
-
-    // Validate password length
-    if (formData.passwordHash.length < 6) {
-      setMessage("Mật khẩu phải có ít nhất 6 ký tự");
-      setMessageType("error");
-      return;
-    }
-
-    const result = await sendOtpForRegister(formData.email);
-    setMessage(result.message || '');
-    setMessageType(result.success ? 'success' : 'error');
-    
     if (result.success) {
-      setStep('otp');
-    }
-  };
-
-  // Đăng ký với OTP
-  const handleRegister = async (e: any) => {
-    e.preventDefault();
-    if (!otpCode) {
-      setMessage("Vui lòng nhập mã OTP");
-      setMessageType("error");
-      return;
-    }
-
-    const { agreed, ...registerData } = formData;
-    
-    // Debug: Log the data being sent
-    console.log('Registering with data:', { ...registerData, passwordHash: '[HIDDEN]', otp: otpCode });
-    
-   const result = await register(registerData, otpCode);
-
-setMessage(result.message || '');
-setMessageType(result.success ? 'success' : 'error');
-
-    
-    if (result.success) {
-      toast.success("🎉 Đăng ký thành công! Chào mừng bạn trở lại 👋", {
-      style: {
-        borderRadius: "12px",
-        background: "#1E1E2F",
-        color: "#fff",
-        padding: "12px 16px",
-      },
-      iconTheme: {
-        primary: "#8b5cf6",
-        secondary: "#fff",
-      },
-    });
-      // Reset form sau khi đăng ký thành công
-      setFormData({
-        email: "",
-        passwordHash: "",
-        firstName: "",
-        lastName: "",
-        dateOfBirth: "",
-        agreed: false,
-      });
+      showToast("Đăng ký tài khoản thành công!", "success")
+      setFormData({ email: "", passwordHash: "", firstName: "", lastName: "", dateOfBirth: "", agreed: false });
       setOtpCode("");
-      setStep('form');
-      
+      setStep("form");
+      navigate("/login");
+    }
+    else{
+      showToast(result.message || "Mã OTP không hợp lệ", "error")
     }
   };
+
 
   return (
     // Áp dụng font Inter và màu nền chính
-      <div className="min-h-screen bg-dark-bg flex items-center justify-center font-inter p-4">
-        {/* Áp dụng màu nền thẻ và hiệu ứng animation */}
-        <div className="w-full max-w-md bg-dark-surface rounded-2xl p-8 shadow-lg animate-fade-in">
-        <div className="flex items-center mb-3">
+    <div className="min-h-screen bg-dark-bg flex items-center justify-center font-inter p-4">
+      <AnimatedBackground />
+      {/* Áp dụng màu nền thẻ và hiệu ứng animation */}
+      <div className="w-full max-w-md bg-dark-surface rounded-2xl p-8 shadow-lg">
+        <div className="flex items-center mb-3 justify-center">
           <div className="bg-accent p-2 rounded-lg mr-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -165,11 +192,11 @@ setMessageType(result.success ? 'success' : 'error');
             Producer Workbench
           </h1>
         </div>
-        <h2 className="text-3xl font-bold text-white mb-2">
+        <h2 className="text-3xl font-bold text-white mb-2 ml-8">
           Tạo tài khoản của bạn
         </h2>
-        {step === 'form' ? (
-          <form onSubmit={handleSendOtp}>
+        {step === "form" ? (
+          <form onSubmit={handleSendOtp} noValidate>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -186,9 +213,11 @@ setMessageType(result.success ? 'success' : 'error');
                     className="w-full bg-[#2c2d3c] border border-border-color text-text-primary rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent"
                     placeholder="ví dụ: Hồ.."
                     onChange={handleInputChange}
+                    onBlur={() => handleBlur("firstName")}
                     value={formData.firstName}
                     required
                   />
+                   {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
                 </div>
                 <div>
                   <label
@@ -204,9 +233,11 @@ setMessageType(result.success ? 'success' : 'error');
                     className="w-full bg-[#2c2d3c] border border-border-color text-text-primary rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent"
                     placeholder="ví dụ: Minh"
                     onChange={handleInputChange}
+                    onBlur={() => handleBlur("lastName")}
                     value={formData.lastName}
                     required
                   />
+                   {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
                 </div>
               </div>
 
@@ -224,9 +255,11 @@ setMessageType(result.success ? 'success' : 'error');
                   className="w-full bg-[#2c2d3c] border border-border-color text-text-primary rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent"
                   placeholder="Nhập email của bạn"
                   onChange={handleInputChange}
+                  onBlur={() => handleBlur("email")}
                   value={formData.email}
                   required
                 />
+                 {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
               </div>
 
               <div>
@@ -238,40 +271,55 @@ setMessageType(result.success ? 'success' : 'error');
                 </label>
                 <div className="relative">
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     id="passwordHash"
                     name="passwordHash"
                     className="w-full bg-[#2c2d3c] border border-border-color text-text-primary rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent pr-10"
                     placeholder="Tạo mật khẩu mạnh (tối thiểu 6 ký tự)"
                     onChange={handleInputChange}
+                    onBlur={() => handleBlur("passwordHash")}
                     value={formData.passwordHash}
                     minLength={6}
                     required
                   />
-                  <span className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer">
-                    <EyeIcon />
+                  {errors.passwordHash && <p className="text-red-500 text-sm mt-1">{errors.passwordHash}</p>}
+                  <span
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                   </span>
                 </div>
               </div>
-
               <div>
                 <label
                   className="text-sm font-medium text-text-secondary block mb-2"
                   htmlFor="dateOfBirth"
                 >
-                  Date of Birth
+                  Ngày sinh
                 </label>
                 <input
-                  type="text"
+                  type="date"
                   id="dateOfBirth"
                   name="dateOfBirth"
                   className="w-full bg-[#2c2d3c] border border-border-color text-text-primary rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-accent"
-                  placeholder="Năm/tháng/ngày (ví dụ: 1990/01/01)"
-                  onChange={handleInputChange}
-                  value={formData.dateOfBirth}
-                  pattern="\d{4}/\d{2}/\d{2}"
+                  // Khi chọn ngày → lưu dạng yyyy/MM/dd
+                  onChange={(e) => {
+                    const formattedDate = e.target.value.replaceAll("-", "/");
+                    setFormData((prev) => ({
+                      ...prev,
+                      dateOfBirth: formattedDate,
+                    }));
+                  }}
+                  // Khi mất focus → validate định dạng
+                  onBlur={() => handleBlur("dateOfBirth")}
+                  // Hiển thị đúng cho input date
+                  value={formData.dateOfBirth.replaceAll("/", "-")}
+                  min="1900-01-01"
+                  max={new Date().toISOString().split("T")[0]}
                   required
                 />
+                {errors.dateOfBirth && <p className="text-red-500 text-sm mt-1">{errors.dateOfBirth}</p>}
               </div>
 
               <div className="flex items-center mt-6">
@@ -312,10 +360,14 @@ setMessageType(result.success ? 'success' : 'error');
           <form onSubmit={handleRegister}>
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <h3 className="text-xl font-bold text-white mb-2">Xác minh địa chỉ email của bạn</h3>
+                <h3 className="text-xl font-bold text-white mb-2">
+                  Xác minh địa chỉ email của bạn
+                </h3>
                 <p className="text-text-secondary">
                   Chúng tôi đã gửi mã xác minh (OTP) đến <br />
-                  <span className="text-accent font-medium">{formData.email}</span>
+                  <span className="text-accent font-medium">
+                    {formData.email}
+                  </span>
                 </p>
               </div>
 
@@ -349,7 +401,7 @@ setMessageType(result.success ? 'success' : 'error');
 
               <button
                 type="button"
-                onClick={() => setStep('form')}
+                onClick={() => setStep("form")}
                 className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-500 transition-colors"
               >
                 Quay lại biểu mẫu
@@ -358,21 +410,12 @@ setMessageType(result.success ? 'success' : 'error');
           </form>
         )}
 
-        {/* Message Display */}
-        {message && (
-          <div className={`mt-4 p-3 rounded-lg text-sm ${
-            messageType === 'success' 
-              ? 'bg-green-900/20 text-green-400 border border-green-400/20' 
-              : 'bg-red-900/20 text-red-400 border border-red-400/20'
-          }`}>
-            {message}
-          </div>
-        )}
-
         <div className="mt-8 text-center">
           <p className="text-sm text-text-secondary">
             Bạn đã có tài khoản?{" "}
-              <Link className="font-bold text-accent hover:underline" to="/login">Đăng nhập</Link>
+            <Link className="font-bold text-accent hover:underline" to="/login">
+              Đăng nhập
+            </Link>
           </p>
         </div>
       </div>

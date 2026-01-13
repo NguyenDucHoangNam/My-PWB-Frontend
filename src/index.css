@@ -1,28 +1,40 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-html, body {
+
+html,
+body {
   min-height: 100%;
 }
 
 /* Base theme colors */
 @layer base {
   :root {
-    --bg: 255 255 255; /* white */
-    --surface: 249 250 251; /* gray-50 */
-    --text: 17 24 39; /* gray-900 */
-    --muted: 75 85 99; /* gray-600 */
-    --border: 229 231 235; /* gray-200 */
+    --bg: 255 255 255;
+    /* white */
+    --surface: 249 250 251;
+    /* gray-50 */
+    --text: 17 24 39;
+    /* gray-900 */
+    --muted: 75 85 99;
+    /* gray-600 */
+    --border: 229 231 235;
+    /* gray-200 */
   }
 
   .dark {
-    --bg: 17 17 23; /* near #111217 */
-    --surface: 24 25 36; /* near #1E1F2B */
-    --text: 229 231 235; /* gray-200 */
-    --muted: 156 163 175; /* gray-400 */
-    --border: 55 65 81; /* gray-700 */
+    --bg: 17 17 23;
+    /* near #111217 */
+    --surface: 24 25 36;
+    /* near #1E1F2B */
+    --text: 229 231 235;
+    /* gray-200 */
+    --muted: 156 163 175;
+    /* gray-400 */
+    --border: 55 65 81;
+    /* gray-700 */
   }
 
   html {
@@ -36,13 +48,850 @@ html, body {
   }
 }
 
-index.css
-.my-masonry-grid {
+index.css .my-masonry-grid {
   display: flex;
-  margin-left: -30px; /* gutter size offset */
+  margin-left: -30px;
+  /* gutter size offset */
   width: auto;
 }
+
 .my-masonry-grid_column {
-  padding-left: 30px; /* gutter size */
+  padding-left: 30px;
+  /* gutter size */
   background-clip: padding-box;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotateY-180 {
+  transform: rotateY(180deg);
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0px);
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+}
+
+/* ẨN SCROLL */
+
+/* global.css hoặc trong style tag */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Opera */
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  /* IE, Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  /* đổi icon sang trắng */
+}
+
+@keyframes spin-slower {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-reverse {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-slower {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-reverse {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+.animate-spin-slower {
+  animation: spin-slower 90s linear infinite;
+}
+
+.animate-spin-reverse {
+  animation: spin-reverse 100s linear infinite;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-100vh);
+    opacity: 0;
+  }
+}
+
+@keyframes meteor {
+  0% {
+    transform: translateX(0) translateY(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(-100vw) translateY(50vh);
+    opacity: 0;
+  }
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes orbit {
+  0% {
+    transform: rotate(0deg) translateX(10px) rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg) translateX(10px) rotate(-360deg);
+  }
+}
+
+@keyframes wavePulse {
+  0%,
+  100% {
+    transform: scale(0.95);
+    opacity: 0.3;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.6;
+  }
+}
+
+@keyframes floatAstronaut {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-15px) rotate(2deg);
+  }
+}
+
+@keyframes shineBorder {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.custom-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.custom-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes eq {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.animate-eq {
+  animation: eq 1s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+@keyframes zoom-in {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-zoom-in {
+  animation: zoom-in 0.4s ease-out;
+}
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 8s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+  }
+
+  to {
+    box-shadow: 0 0 25px rgba(236, 72, 153, 0.8);
+  }
+}
+
+.cosmic-text {
+  background: linear-gradient(90deg, #a855f7, #ec4899, #fcd34d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes floating {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@layer utilities {
+  .animate-floating {
+    animation: floating 3.5s ease-in-out infinite;
+  }
+
+  .glow-name {
+    text-shadow: 0 0 10px rgba(117, 0, 255, 0.6),
+      0 0 20px rgba(0, 255, 255, 0.5), 0 0 40px rgba(0, 180, 255, 0.3);
+  }
+}
+
+/* Thêm vào file CSS toàn cục của bạn (ví dụ: global.css) hoặc mở rộng theme trong tailwind.config.js */
+
+@keyframes hyperdrive {
+  0%,
+  100% {
+    text-shadow: 0 0 10px rgba(97, 218, 255, 0.3),
+      0 0 20px rgba(150, 100, 255, 0.5);
+    transform: scale(1);
+  }
+
+  50% {
+    text-shadow: 0 0 30px rgba(50, 255, 200, 0.5),
+      0 0 50px rgba(255, 100, 200, 0.7);
+    transform: scale(1.02);
+    /* Thêm hiệu ứng phóng to nhẹ */
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 15px rgba(120, 75, 255, 0.8);
+  }
+
+  50% {
+    box-shadow: 0 0 25px rgba(150, 100, 255, 1),
+      0 0 50px rgba(255, 150, 200, 0.5);
+  }
+}
+
+@keyframes spin-fast {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-2px);
+  }
+
+  50% {
+    transform: translateX(2px);
+  }
+
+  75% {
+    transform: translateX(-2px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Thêm vào global.css hoặc style component */
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  /* IE và Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* Space-Themed Holographic Portal Animations */
+
+/* Signal Station: Scanning Beam */
+@keyframes beam-scan {
+  0% {
+    background-position: 0% 100%;
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+
+  100% {
+    background-position: 0% 0%;
+    opacity: 0.3;
+  }
+}
+
+.animate-beam-scan {
+  animation: beam-scan 2s ease-in-out infinite;
+  background-size: 100% 200%;
+}
+
+/* Signal Station: Data Particles Rising */
+@keyframes particle-rise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-200px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.animate-particle-rise {
+  animation: particle-rise 2s ease-out infinite;
+}
+
+/* Signal Station: Icon Levitation */
+@keyframes icon-levitate {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-icon-levitate {
+  animation: icon-levitate 3s ease-in-out infinite;
+}
+
+/* Approval Bay: Icon Banking */
+@keyframes icon-bank {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+.animate-icon-bank {
+  animation: icon-bank 2.5s ease-in-out infinite;
+}
+
+/* Approval Bay: Icon Shake (Engine Rumble) */
+@keyframes icon-shake {
+  0%,
+  100% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+
+  10% {
+    transform: translateX(-1px) translateY(-1px) rotate(-1deg);
+  }
+
+  20% {
+    transform: translateX(1px) translateY(1px) rotate(1deg);
+  }
+
+  30% {
+    transform: translateX(-1px) translateY(0) rotate(-0.5deg);
+  }
+
+  40% {
+    transform: translateX(1px) translateY(-1px) rotate(0.5deg);
+  }
+
+  50% {
+    transform: translateX(0) translateY(1px) rotate(0deg);
+  }
+
+  60% {
+    transform: translateX(-1px) translateY(-1px) rotate(-0.5deg);
+  }
+
+  70% {
+    transform: translateX(1px) translateY(0) rotate(0.5deg);
+  }
+
+  80% {
+    transform: translateX(0) translateY(1px) rotate(0deg);
+  }
+
+  90% {
+    transform: translateX(-1px) translateY(-1px) rotate(-0.5deg);
+  }
+}
+
+.animate-icon-shake {
+  animation: icon-shake 0.5s ease-in-out infinite;
+}
+
+/* Approval Bay: Warp Speed Lines */
+@keyframes warp-speed {
+  0% {
+    transform: translateX(-100%) scaleX(0.5);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: translateX(200%) scaleX(1.5);
+    opacity: 0;
+  }
+}
+
+.animate-warp-speed {
+  animation: warp-speed 0.8s linear infinite;
+}
+
+/* Approval Bay: Star Warp Stretch */
+@keyframes warp-stretch {
+  0%,
+  100% {
+    transform: scale(1) translateX(0);
+    opacity: 0.1;
+  }
+
+  50% {
+    transform: scale(1.1) translateX(5px);
+    opacity: 0.3;
+  }
+}
+
+.animate-warp-stretch {
+  animation: warp-stretch 3s ease-in-out infinite;
+}
+
+/* Gradient Animation for Title */
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  animation: gradient 3s ease infinite;
+  background-size: 200% 200%;
+}
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 28px rgba(255, 0, 180, 0.65),
+      0 0 48px rgba(0, 225, 255, 0.55);
+    border-color: rgba(230, 0, 255, 0.9);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 1.5s ease-in-out infinite;
+}
+
+/* 🌠 Light sweep */
+.quantum-sweep {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: sweepMotion 6s linear infinite;
+}
+
+@keyframes sweepMotion {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ✨ Buttons glow */
+.quantum-btn {
+  transition: 0.2s ease;
+}
+
+.quantum-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  filter: drop-shadow(0 0 8px rgba(200, 0, 255, 0.45));
+}
+
+/* ❗ Danger button với glow đỏ */
+.quantum-btn-danger:hover {
+  transform: translateY(-2px) scale(1.05);
+  filter: drop-shadow(0 0 10px rgba(255, 60, 60, 0.7));
+}
+
+/* 👑 Host badge */
+.quantum-badge {
+  position: relative;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.quantum-badge-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  animation: badgeSpin 8s linear infinite;
+}
+
+@keyframes badgeSpin {
+  0% {
+    box-shadow: 0 0 12px rgba(230, 0, 255, 0.4),
+      0 0 24px rgba(0, 255, 255, 0.35);
+  }
+
+  50% {
+    box-shadow: 0 0 18px rgba(255, 0, 200, 0.7),
+      0 0 32px rgba(0, 255, 255, 0.55);
+  }
+
+  100% {
+    box-shadow: 0 0 12px rgba(230, 0, 255, 0.4),
+      0 0 24px rgba(0, 255, 255, 0.35);
+  }
+}
+
+/* 🌌 Main container background */
+.quantum-control {
+  background: rgba(20, 20, 35, 0.55);
+  border: 1px solid rgba(200, 0, 255, 0.15);
+  box-shadow: 0 0 30px rgba(200, 0, 255, 0.3),
+    inset 0 0 15px rgba(0, 200, 255, 0.15);
+}
+
+.quantum-badge-pill {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  position: relative;
+}
+
+.quantum-badge-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  animation: badgeSpin 8s linear infinite;
+}
+
+@keyframes badgeSpin {
+  0% {
+    box-shadow: 0 0 12px rgba(230, 0, 255, 0.4),
+      0 0 24px rgba(0, 255, 255, 0.35);
+  }
+
+  50% {
+    box-shadow: 0 0 18px rgba(255, 0, 200, 0.7),
+      0 0 32px rgba(0, 255, 255, 0.55);
+  }
+
+  100% {
+    box-shadow: 0 0 12px rgba(230, 0, 255, 0.4),
+      0 0 24px rgba(0, 255, 255, 0.35);
+  }
+}
+/* CSS Keyframes cho hiệu ứng vệt sáng */
+@keyframes shimmer-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%); /* Đảm bảo vệt sáng chạy hết ra ngoài */
+  }
+}
+
+/* Tailwind Utility cho animation */
+.animate-shimmer-sweep {
+  animation: shimmer-sweep 2.5s infinite linear;
+}
+
+/* CSS Keyframes cho hiệu ứng border glow */
+@keyframes border-glow-pulse {
+  0% {
+    border-color: #3B82F6; /* Xanh ban đầu */
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.4), 0 0 10px rgba(107, 33, 168, 0.3);
+  }
+  50% {
+    border-color: #EC4899; /* Hồng neon */
+    box-shadow: 0 0 8px rgba(236, 72, 153, 0.6), 0 0 15px rgba(107, 33, 168, 0.5);
+  }
+  100% {
+    border-color: #3B82F6; /* Trở lại xanh */
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.4), 0 0 10px rgba(107, 33, 168, 0.3);
+  }
+}
+
+/* Keyframes cho hiệu ứng nhịp đập của huy hiệu xác thực */
+@keyframes badge-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 12px rgba(34, 197, 94, 0.7); }
+  100% { transform: scale(1); box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); }
+}
+
+/* Tailwind Utilities */
+.animate-border-glow {
+  animation: border-glow-pulse 4s infinite ease-in-out;
+}
+
+.animate-badge-pulse {
+  animation: badge-pulse 2s infinite ease-in-out;
+}
+
+/* Thêm style cho shadow-text-glow-pink nếu chưa có */
+.shadow-text-glow-pink {
+  text-shadow: 0 0 8px rgba(236, 72, 153, 0.8);
+}
+
+/* CSS Keyframes cho hiệu ứng Hologram Glitch */
+@keyframes hologram-glitch {
+  0% {
+    border-color: #3B82F6;
+    box-shadow: 0 0 10px #3B82F6, 0 0 20px rgba(59, 130, 246, 0.6);
+  }
+  5% {
+    transform: translateX(1px);
+    border-color: #EC4899;
+  }
+  10% {
+    transform: translateX(-1px);
+  }
+  15% {
+    transform: translateX(2px);
+    border-color: #8B5CF6;
+  }
+  20% {
+    transform: translateX(-2px);
+  }
+  25% {
+    transform: none;
+    border-color: #3B82F6;
+  }
+  /* Giữ trạng thái ổn định lâu hơn */
+  80% {
+    transform: none;
+  }
+  85% {
+    transform: skewX(1deg); /* Kéo nghiêng nhẹ */
+    border-color: #EC4899;
+  }
+  90% {
+    transform: skewX(-1deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* Tailwind Utility mới */
+.animate-hologram-glitch {
+  animation: hologram-glitch 5s infinite steps(20, start); /* steps(20) tạo hiệu ứng giật kỹ thuật số */
+}
+
+/* Style cho dropdown option */
+select option {
+  background-color: #2b1f47 !important;  /* tím cosmic */
+  color: #fceaff !important;             /* tím sáng */
+  padding: 8px;
+}
+
+/* Khi hover option */
+select option:hover {
+  background-color: #3d2b63 !important;
+  color: #ffffff !important;
+}
+
+/* Custom CSS */
+.shadow-neon-yellow {
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+}
+.shadow-neon-cyan {
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.6), 0 0 5px rgba(34, 211, 238, 0.3);
+}
+
+/* Custom scrollbar - Space Theme */
+::-webkit-scrollbar {
+  width: 12px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, rgba(34, 211, 238, 0.6), rgba(168, 85, 247, 0.6));
+  border-radius: 6px;
+  border: 2px solid rgba(15, 23, 42, 0.3);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, rgba(34, 211, 238, 0.8), rgba(168, 85, 247, 0.8));
 }

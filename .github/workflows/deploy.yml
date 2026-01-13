@@ -1,0 +1,81 @@
+name: Deploy to AWS S3 + CloudFront
+
+on:
+  push:
+    branches:
+      - main  # Deploy khi push lên branch main
+  pull_request:
+    branches:
+      - main  # Build test khi tạo PR
+  workflow_dispatch:  # Cho phép chạy manual từ GitHub UI
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # # 4. Run linter (optional)
+      # - name: Run ESLint
+      #   run: npm run lint
+      #   continue-on-error: true  # Không fail nếu có lỗi lint
+
+      # 5. Build React app
+      - name: Build React app
+        run: npm run build
+        env:
+          CI: true
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_FIREBASE_MEASUREMENT_ID: ${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}
+
+      # 6. Deploy to S3 (chỉ chạy khi push lên main)
+      - name: Deploy to S3
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: jakejarvis/s3-sync-action@v0.5.1
+        with:
+          args: --delete --cache-control max-age=31536000
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'ap-southeast-1'  # Thay đổi nếu dùng region khác
+          SOURCE_DIR: 'dist'
+
+      # 7. Invalidate CloudFront cache
+      - name: Invalidate CloudFront
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: chetan/invalidate-cloudfront-action@v2
+        env:
+          DISTRIBUTION: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
+          PATHS: '/*'
+          AWS_REGION: 'ap-southeast-1'
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # 8. Thông báo thành công
+      - name: Deployment successful
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "🚀 Deployment successful!"
+          echo "✅ Website đã được deploy lên S3 và CloudFront"
+          echo "🌐 Truy cập tại: https://${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}.cloudfront.net"

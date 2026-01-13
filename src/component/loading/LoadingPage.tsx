@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import landingAstronaut from "../../assets/landingAstronaut.json";
+import Lottie from "lottie-react";
 
 const NOTE_FREQ = {
   C4: 261.63,
@@ -29,7 +31,7 @@ type Props = {
   onFinish?: () => void;
 };
 
-const LoadingPage = ({ duration = 6000, onFinish }: Props) => {
+const LoadingPage = ({ duration = 2000, onFinish }: Props) => {
   const [visible, setVisible] = useState(true);
   const [activeKey, setActiveKey] = useState<keyof typeof NOTE_FREQ | null>(
     null
@@ -217,6 +219,8 @@ const LoadingPage = ({ duration = 6000, onFinish }: Props) => {
     let rafId = 0;
 
     function draw() {
+      if (!ctx) return;
+
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
       // Nền tối chuyển màu nhẹ
@@ -300,8 +304,18 @@ const LoadingPage = ({ duration = 6000, onFinish }: Props) => {
         ref={notesLayerRef}
         className="pointer-events-none absolute inset-0"
       ></div>
-
-      <div className="relative z-10 flex flex-col items-center gap-8">
+      <div
+        className="absolute w-56 md:w-72 opacity-90 animate-[orbitAstronaut_18s_ease-in-out_infinite]"
+        style={{
+          transformOrigin: "center center",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -100%)",
+        }}
+      >
+        <Lottie animationData={landingAstronaut} loop />
+      </div>
+      <div className="relative z-10 flex flex-col items-center mt-[160px] gap-8">
         <div className="flex items-end justify-center w-full max-w-4xl px-6">
           <div className="speaker speaker-left mr-6">
             <div className="inner-ring"></div>

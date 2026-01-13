@@ -9,7 +9,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ project }) => {
   const getMemberById = (id: number) => project.members.find(m => m.id === id);
 
   const milestoneStatusColors: { [key: string]: string } = {
-    'Chưa bắt đầu': 'bg-gray-500/20 text-gray-400',
+    'Đang Chờ Lệnh': 'bg-gray-500/20 text-gray-400',
     'Đang làm': 'bg-blue-500/20 text-blue-400',
     'Chờ duyệt': 'bg-yellow-500/20 text-yellow-400',
     'Đã hoàn thành': 'bg-green-500/20 text-green-400',

@@ -1,70 +1,100 @@
-import axios from "axios";
-import type { AxiosInstance } from "axios";
+import axios, { type AxiosInstance } from "axios";
 import { globalLogout } from "../utils/authUtils";
+import { getToken as getTokenFromStore } from "../utils/tokenStore";
 
-const baseURL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const envBase = import.meta.env.VITE_API_URL as string | undefined;
 
 const apiInstance: AxiosInstance = axios.create({
-  baseURL,
-  timeout: 15000,
+  baseURL: envBase,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// ✅ Gắn accessToken vào tất cả request
-apiInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("accessToken");
-    console.log('Token ',token);
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// Attach Authorization header from in-memory token store
+apiInstance.interceptors.request.use((config) => {
+  try {
+    const token = getTokenFromStore() || localStorage.getItem("accessToken");
+    const isAuthApi =
+      config.url?.includes("api/v1/auth/login") ||
+      config.url?.includes("api/v1/auth/register") ||
+      config.url?.includes("api/v1/auth/refresh-token") ||
+      config.url?.includes("api/v1/auth/outbound/authentication");
 
-// ✅ Tự động refresh accessToken nếu bị lỗi 401
+    if (token && !isAuthApi) {
+      config.headers = config.headers || {};
+      (config.headers as any).Authorization = `Bearer ${token}`;
+    }
+  } catch {
+    // ignore
+  }
+  return config;
+});
+
 apiInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const isAuthApi =
+      originalRequest.url?.includes("api/v1/auth/login") ||
+      originalRequest.url?.includes("api/v1/auth/register") ||
+      originalRequest.url?.includes("api/v1/auth/refresh-token") ||
+      originalRequest.url?.includes("api/v1/auth/outbound/authentication");
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isAuthApi
+    ) {
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (!refreshToken) {
+        const currentToken = localStorage.getItem("accessToken");
+        if (!currentToken) {
           globalLogout();
-          return Promise.reject(new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."));
+          return Promise.reject(
+            new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
+          );
         }
 
-        const response = await apiInstance.post(`/api/auth/refresh-token`, {
-          refreshToken,
-        });
+        // Gọi API refresh-token với field "token"
+        const response = await axios.post(
+          `${envBase}/api/v1/auth/refresh-token`,
+          {
+            token: currentToken,
+          }
+        );
 
-        const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
+        const { result } = response.data;
+        if (!result?.authenticated) {
+          globalLogout();
+          return Promise.reject(
+            new Error("Xác thực thất bại, cần đăng nhập lại.")
+          );
+        }
 
-        // Lưu cả accessToken và refreshToken mới
-        localStorage.setItem("accessToken", newAccessToken);
-        localStorage.setItem("refreshToken", newRefreshToken);
+        // Lưu lại token mới
+        localStorage.setItem("accessToken", result.token);
 
-        // Cập nhật header cho request gốc
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        // Gắn token mới vào header cho request gốc
+        originalRequest.headers = originalRequest.headers || {};
+        originalRequest.headers.Authorization = `Bearer ${result.token}`;
+
         return apiInstance(originalRequest);
       } catch (err) {
-        // Nếu refreshToken hết hạn hoặc không hợp lệ
         globalLogout();
-        // Có thể thêm thông báo cho người dùng
-        return Promise.reject(new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", { cause: err }));
+        return Promise.reject(
+          new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", {
+            cause: err,
+          })
+        );
       }
     }
 
     return Promise.reject(error);
   }
 );
-
 
 export default apiInstance;

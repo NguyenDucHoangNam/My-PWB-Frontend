@@ -59,7 +59,7 @@ const ComplaintList: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 dark:bg-[rgb(var(--bg))] dark:text-[rgb(var(--text))] p-8 transition-colors">
+    <div className="min-h-screen bg-white text-gray-900 dark:bg-[rgb(var(--bg))] dark:text-[rgb(var(--text))] p-8 transition-colors mt-[70px]">
       {/* Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}

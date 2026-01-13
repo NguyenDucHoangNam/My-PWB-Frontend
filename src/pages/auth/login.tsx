@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
+import AnimatedBackground from "../../component/background/AnimatedBackground";
+import { useCosmicToast } from "../../component/toast/CosmicToastProvider";
+// Permissions API removed
 
 // --- SVG Icons ---
 const MusicIcon = () => (
@@ -73,51 +75,78 @@ const EyeClosedIcon = () => (
   </svg>
 );
 
-// --- Main Login Component ---
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const { login, isLoading } = useAuth();
+  const { login, loginWithGoogle, isLoading } = useAuth();
+  const { showToast } = useCosmicToast();
   const navigate = useNavigate();
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // --- Validate riêng khi blur ---
+  const validateEmail = () => {
+    if (!email) return "Vui lòng nhập Email!";
+    if (!emailRegex.test(email)) return "Vui lòng nhập đúng định dạng Email!";
+    return "";
+  };
+
+  const validatePassword = () => {
+    if (!password) return "Vui lòng nhập mật khẩu!";
+    return "";
+  };
+
+  // --- Trigger khi blur ---
+  const handleBlur = (field: "email" | "password") => {
+    const newErrors = { ...errors };
+    if (field === "email") newErrors.email = validateEmail();
+    if (field === "password") newErrors.password = validatePassword();
+    setErrors(newErrors);
+  };
+
+  // --- Validate toàn form khi submit ---
+  const validateAll = () => {
+    const emailError = validateEmail();
+    const passwordError = validatePassword();
+    setErrors({ email: emailError, password: passwordError });
+    return !emailError && !passwordError;
+  };
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!email || !password) return;
 
-    setErrorMessage("");
+    // Validate toàn bộ form
+    if (!validateAll()) return;
+
     const result = await login(email, password);
 
     if (result.success) {
-      toast.success("🎉 Đăng nhập thành công! Chào mừng bạn trở lại 👋", {
-        style: {
-          borderRadius: "12px",
-          background: "#1E1E2F",
-          color: "#fff",
-          padding: "12px 16px",
-        },
-        iconTheme: {
-          primary: "#8b5cf6",
-          secondary: "#fff",
-        },
-      });
-      navigate("/");
+      showToast(
+        "🎉 Đăng nhập thành công! Chào mừng bạn đến vũ trụ âm nhạc!",
+        "success"
+      );
+      // Redirect admin to dashboardAdmin
+      if (result.role === "ADMIN") {
+        navigate("/dashboardAdmin");
+      } else {
+        navigate("/");
+      }
     } else {
-      setErrorMessage(result.message || "Login failed. Please try again.");
+      showToast(
+        result.message || "❌ Lỗi đăng nhập. Vui lòng thử lại!",
+        "error"
+      );
     }
   };
 
   return (
     <div className="h-screen flex items-center justify-center bg-dark-bg px-4 font-inter">
-      <div
-        className="
-      w-full max-w-md 
-      bg-dark-surface rounded-2xl p-6 md:p-8 
-      shadow-2xl animate-fade-in
-      max-h-[95vh]
-    "
-      >
+      <AnimatedBackground />
+      <div className="w-full max-w-md bg-dark-surface rounded-2xl p-6 md:p-8 shadow-2xl max-h-[95vh]">
         {/* Logo Section */}
         <div className="flex flex-col items-center mb-8">
           <div className="flex items-center justify-center mb-4">
@@ -150,14 +179,20 @@ const LoginPage = () => {
               Email
             </label>
             <input
-              type="email"
+              type="text"
               id="email"
-              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border-2 bg-dark-surface border-border-color text-text-primary transition-all duration-200 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              onBlur={() => handleBlur("email")}
+              className={`w-full px-4 py-3 rounded-lg border-2 bg-dark-surface text-text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/20 ${errors.email
+                ? "border-red-500 focus:border-red-500"
+                : "border-border-color focus:border-accent"
+                }`}
               placeholder="Nhập email của bạn"
             />
+            {errors.email && (
+              <p className="text-red-400 text-sm mt-1">{errors.email}</p>
+            )}
           </div>
 
           {/* Password Field */}
@@ -172,11 +207,14 @@ const LoginPage = () => {
               <input
                 type={isPasswordVisible ? "text" : "password"}
                 id="password"
-                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border-2 bg-dark-surface border-border-color text-text-primary pr-12 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                placeholder="Nhâp mật khẩu của bạn"
+                onBlur={() => handleBlur("password")}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-dark-surface text-text-primary pr-12 focus:outline-none focus:ring-2 focus:ring-accent/20 ${errors.password
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-border-color focus:border-accent"
+                  }`}
+                placeholder="Nhập mật khẩu của bạn"
               />
               <button
                 type="button"
@@ -186,14 +224,10 @@ const LoginPage = () => {
                 {isPasswordVisible ? <EyeClosedIcon /> : <EyeOpenIcon />}
               </button>
             </div>
+            {errors.password && (
+              <p className="text-red-400 text-sm mt-1">{errors.password}</p>
+            )}
           </div>
-
-          {/* Error Message */}
-          {errorMessage && (
-            <div className="text-sm text-red-400 bg-red-900/20 border border-red-400/30 rounded-lg p-3">
-              {errorMessage}
-            </div>
-          )}
 
           {/* Forgot Password Link */}
           <div className="text-right">
@@ -225,11 +259,14 @@ const LoginPage = () => {
         {/* Google Login */}
         <button
           type="button"
-          className="w-full py-3 px-4 rounded-lg font-medium border-2 bg-dark-surface border-border-color text-text-primary flex items-center justify-center space-x-3 hover:border-accent"
+          onClick={loginWithGoogle}
+          disabled={isLoading}
+          className="w-full py-3 px-4 rounded-lg font-medium border-2 bg-dark-surface border-border-color text-text-primary flex items-center justify-center space-x-3 hover:border-accent transition-all duration-200 disabled:opacity-50"
         >
           <GoogleIcon />
           <span>Đăng nhập với Google</span>
         </button>
+
         {/* Sign Up Link */}
         <div className="text-center mt-2">
           <p className="text-sm text-text-secondary">

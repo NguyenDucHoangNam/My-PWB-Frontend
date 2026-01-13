@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   FiDollarSign,
   FiPlus,
@@ -9,6 +9,7 @@ import {
 } from "react-icons/fi";
 import type { Project, Milestone } from "../../types/types";
 import { Link } from "react-router-dom";
+import AnimatedBackground from "../../component/background/AnimatedBackground";
 
 const projectData: Project = {
   id: 1,
@@ -16,7 +17,7 @@ const projectData: Project = {
   client: "Luna",
   imageUrl:
     "https://images.unsplash.com/photo-1516269613936-48c93545d4f3?w=400",
-  status: "Đang thực hiện",
+  status: "Đang Vận Hành",
   progress: 60,
   contract: {
     partyA: "Alex Thorne (Producer)",
@@ -69,7 +70,7 @@ const projectData: Project = {
     {
       id: 3,
       name: "Final Mix & Master",
-      status: "Chưa bắt đầu",
+      status: "Đang Chờ Lệnh",
       assigneeId: 1,
       deadline: "2025-08-30",
       cost: 2500000,
@@ -77,16 +78,17 @@ const projectData: Project = {
   ],
   splits: [
     // Cột mốc 1: Sản xuất Beat (Tổng 7,500,000)
-    { memberId: 1, job: "Sản xuất Beat", amount: 4000000, milestoneId: 1 },
+    { memberId: 1, job: "Sản xuất Beat", amount: 4000000, milestoneId: 1, percentage: 53.3 },
     {
       memberId: 3,
       job: "Thuê ngoài (Guitarist)",
       amount: 500000,
       milestoneId: 1,
+      percentage: 6.7,
     },
     // Cột mốc 2: Thu âm Vocal (Tổng 5,000,000)
-    { memberId: 2, job: "Session Vocalist", amount: 4000000, milestoneId: 2 },
-    { memberId: 1, job: "Recording Engineer", amount: 1000000, milestoneId: 2 },
+    { memberId: 2, job: "Session Vocalist", amount: 4000000, milestoneId: 2, percentage: 80 },
+    { memberId: 1, job: "Recording Engineer", amount: 1000000, milestoneId: 2, percentage: 20 },
   ],
   transactions: [],
   files: [],
@@ -110,6 +112,7 @@ const AccordionMilestone = ({
 
   return (
     <div className="bg-white dark:bg-dark-bg border border-gray-200 dark:border-border-color rounded-lg">
+      <AnimatedBackground/>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex justify-between items-center p-4"
@@ -122,19 +125,17 @@ const AccordionMilestone = ({
         </div>
         <div className="flex items-center space-x-4">
           <p
-            className={`text-sm font-medium ${
-              totalSplitAmount === milestone.cost
+            className={`text-sm font-medium ${totalSplitAmount === milestone.cost
                 ? "text-green-400"
                 : "text-yellow-400"
-            }`}
+              }`}
           >
             Đã chia: {new Intl.NumberFormat("vi-VN").format(totalSplitAmount)}{" "}
             VNĐ
           </p>
           <FiChevronDown
-            className={`transform transition-transform ${
-              isOpen ? "rotate-180" : ""
-            }`}
+            className={`transform transition-transform ${isOpen ? "rotate-180" : ""
+              }`}
           />
         </div>
       </button>
@@ -178,7 +179,7 @@ const AccordionMilestone = ({
 };
 
 function SplitSheetPage() {
-  const [project, setProject] = useState<Project>(projectData);
+  const [project] = useState<Project>(projectData);
   const totalSplitAmount = project.splits.reduce((sum, s) => sum + s.amount, 0);
 
   if (!project.contract) {
@@ -270,11 +271,11 @@ function SplitSheetPage() {
         )}
 
         <div className="flex justify-end mt-8">
-            <button
+          <button
             onClick={handleSubmit}
             className="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-500 transition-colors">
-              Lưu tất cả thay đổi
-            </button>
+            Lưu tất cả thay đổi
+          </button>
         </div>
       </div>
     </div>
